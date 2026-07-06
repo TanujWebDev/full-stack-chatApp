@@ -1,26 +1,39 @@
-import { Camera, Mail, User } from "lucide-react";
+import { Camera, User, Phone, Info } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
   const [selectedImg, setSelectedImg] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [about, setAbout] = useState("");
+
+  // Sync state with authUser on mount or user change
+  useEffect(() => {
+    if (authUser) {
+      setPhone(authUser.phoneNumber || "");
+      setAbout(authUser.about || "Hey there! I am using ChatApp.");
+    }
+  }, [authUser]);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-
     reader.readAsDataURL(file);
-
     reader.onload = async () => {
       const base64Image = reader.result;
       setSelectedImg(base64Image);
       await updateProfile({ profilePic: base64Image });
       setSelectedImg(null);
-    }
+    };
   };
+
+  const handleSaveProfile = async () => {
+    await updateProfile({ phoneNumber: phone, about });
+  };
+
   return (
     <div className="h-screen pt-20">
       <div className="max-w-2xl mx-auto p-4 py-8">
@@ -31,11 +44,10 @@ const ProfilePage = () => {
           </div>
 
           {/* Avatar upload section */}
-
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
-                src={selectedImg ||authUser.profilePic || "/avatar.png"}
+                src={selectedImg || authUser.profilePic || "/avatar.png"}
                 alt="Profile"
                 className="size-32 rounded-full object-cover border-4 "
               />
@@ -67,37 +79,65 @@ const ProfilePage = () => {
             </p>
           </div>
 
+          {/* User Fields Form */}
           <div className="space-y-6">
             <div className="space-y-1.5">
               <div className="text-sm text-zinc-400 flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Full Name
               </div>
-              <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
+              <p className="px-4 py-2.5 bg-base-200 rounded-lg border text-base-content/80 font-medium">
                 {authUser?.fullName}
               </p>
             </div>
 
+            {/* Editable Phone Number */}
             <div className="space-y-1.5">
               <div className="text-sm text-zinc-400 flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                Email Address
+                <Phone className="w-4 h-4" />
+                Phone Number
               </div>
-              <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
-                {authUser?.email}
-              </p>
+              <input
+                type="text"
+                placeholder="+91 87580 48330"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="input input-bordered w-full bg-base-200 focus:outline-none"
+              />
             </div>
+
+            {/* Editable About Status */}
+            <div className="space-y-1.5">
+              <div className="text-sm text-zinc-400 flex items-center gap-2">
+                <Info className="w-4 h-4" />
+                About Status
+              </div>
+              <textarea
+                placeholder="Hey there! I am using ChatApp."
+                value={about}
+                onChange={(e) => setAbout(e.target.value)}
+                rows={2}
+                className="textarea textarea-bordered w-full bg-base-200 focus:outline-none resize-none"
+              />
+            </div>
+
+            {/* Save Button */}
+            <button
+              onClick={handleSaveProfile}
+              disabled={isUpdatingProfile}
+              className="btn btn-primary w-full shadow-lg font-bold cursor-pointer"
+            >
+              {isUpdatingProfile ? "Saving changes..." : "Save Profile Details"}
+            </button>
           </div>
 
           <div className="mt-6 bg-base-300 rounded-xl p-6">
             <h2 className="text-lg font-medium mb-4">Account Information</h2>
-
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between py-2 border-b border-zinc-700">
                 <span>Member Since</span>
                 <span>{authUser?.createdAt?.split("T")[0]}</span>
               </div>
-
               <div className="flex items-center justify-between py-2">
                 <span>Account Status</span>
                 <span className="text-green-500">Active</span>

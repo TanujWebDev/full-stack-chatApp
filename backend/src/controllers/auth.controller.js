@@ -1,12 +1,11 @@
-import User from './../models/user.model.js'
-import bcrypt from 'bcryptjs'
-import {generateToken} from './../lib/utils.js'
-import cloudinary from './../lib/cloudinary.js'
+import User from './../models/user.model.js';
+import bcrypt from 'bcryptjs';
+import { generateToken } from './../lib/utils.js';
+import cloudinary from './../lib/cloudinary.js';
 
 export const signup = async(req, res) => {
     const { fullName, email, password } = req.body;
     try {
-
         if(!fullName || !email || !password) {
             return res.status(400).json({message: "All fields are required"});
         }
@@ -15,7 +14,6 @@ export const signup = async(req, res) => {
         }
 
         const user = await User.findOne({email});
-
         if(user) return res.status(400).json({message: "Email already exists"});
 
         const salt = await bcrypt.genSalt(10);
@@ -25,10 +23,9 @@ export const signup = async(req, res) => {
             fullName,
             email,
             password: hashedPassword
-        })
+        });
 
         if(newUser) {
-            // generate jwt token here 
             generateToken(newUser._id, res);
             await newUser.save(); 
 
@@ -37,8 +34,9 @@ export const signup = async(req, res) => {
                 fullName: newUser.fullName,
                 email: newUser.email,
                 profilePic: newUser.profilePic,
-            })
-
+                phoneNumber: newUser.phoneNumber,
+                about: newUser.about
+            });
         } else {
             res.status(400).json({message: "Invalid user data"});
         }
@@ -46,80 +44,82 @@ export const signup = async(req, res) => {
         console.log("Error in signup controller:", error.message);
         res.status(500).json({message: "Internal server error"});
     }
-}
+};
 
 export const login = async (req, res) => {
     const { email, password } = req.body;
-   try {
-    const user = await User.findOne({email});
+    try {
+        const user = await User.findOne({email});
+        if(!user) {
+            return res.status(400).json({message: "Invalid credentials"});
+        } 
 
-    if(!user) {
-        return res.status(400).json({message: "Invalid credentials"});
-    } 
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if(!isPasswordCorrect) {
+            return res.status(400).json({message: "Invalid credentials"});
+        }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if(!isPasswordCorrect) {
-        return res.status(400).json({message: "Invalid credentials"});
+        generateToken(user._id, res);
+
+        res.status(200).json({
+            _id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            profilePic: user.profilePic,
+            phoneNumber: user.phoneNumber,
+            about: user.about
+        });
+    } catch (error) {
+        console.log("Error in login controller:", error.message);
+        res.status(500).json({message: "Internal server error"});
     }
-
-    generateToken(user._id, res);
-
-    res.status(200).json({
-        _id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        profilePic: user.profilePic,
-    })
-
-   } catch (error) {
-    console.log("Error in login controller:", error.message);
-    res.status(500).json({message: "Internal server error"});
-   }
-}
+};
 
 export const logout = (req, res) => {
     try {
-        res.cookie("jwt", "", {maxAge: 0})
+        res.cookie("jwt", "", {maxAge: 0});
         res.status(200).json({message: "Logged out successfully"});
     } catch (error) {
         console.log("Error in logout controller:", error.message);
         res.status(500).json({message: "Internal server error"});
     }
-}
+};
 
 export const updateProfile = async (req, res) => {
     try {
-        const {profilePic} = req.body;
+        const { profilePic, phoneNumber, about } = req.body;
         const userId = req.user._id;
 
-        if(!profilePic) {
-            return res.status(400).json({message: "Profile pic is required"});
+        const updateData = {};
+        if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+        if (about !== undefined) updateData.about = about;
+
+        if (profilePic) {
+            const uploadResponse = await cloudinary.uploader.upload(profilePic, {
+                folder: "chat-app/profiles",
+                resource_type: "image",
+            });
+            updateData.profilePic = uploadResponse.secure_url;
         }
 
-       const uploadResponse =  await cloudinary.uploader.upload(profilePic, {
-        folder: "chat-app/profiles",
-        resource_type: "image",
-       })
-       const updatedUser = await User.findByIdAndUpdate(userId, {profilePic: uploadResponse.secure_url}, {new: true});
+        const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
 
-       res.status(200).json(updatedUser);
-
+        res.status(200).json(updatedUser);
     } catch (error) {
         console.log("Error in update profile:", error);
         const statusCode = error.http_code === 403 ? 403 : 500;
         const message = error.http_code === 403
             ? "Cloudinary upload is forbidden. Check API key upload permissions."
             : "Failed to update profile";
-
-        res.status(statusCode).json({message});
+        res.status(statusCode).json({ message });
     }
-}
+};
 
 export const checkAuth = async (req, res) => {
     try {
-        res.status(200).json(req.user)
+        res.status(200).json(req.user);
     } catch (error) {
         console.log("Error in checkAuth controller:", error.message);
         res.status(500).json({message: "Internal server error"});
     }
-}
+};

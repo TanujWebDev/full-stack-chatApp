@@ -4,6 +4,12 @@ import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to log out?")) {
+      logout();
+    }
+  };
+
   return (
     <header
       className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 
@@ -43,7 +49,7 @@ const Navbar = () => {
                 </Link>
 
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="btn btn-sm gap-2 cursor-pointer"
                 >
                   <LogOut className="size-5" />

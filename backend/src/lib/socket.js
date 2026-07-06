@@ -32,6 +32,20 @@ io.on("connection", (socket) => {
 
     io.emit("getOnlineUsers", getOnlineUserIds());
 
+    socket.on("typing", ({ receiverId }) => {
+        const receiverSocketIds = getUserSocketIds(receiverId);
+        receiverSocketIds.forEach((socketId) => {
+            io.to(socketId).emit("userTyping", { senderId: userId });
+        });
+    });
+
+    socket.on("stopTyping", ({ receiverId }) => {
+        const receiverSocketIds = getUserSocketIds(receiverId);
+        receiverSocketIds.forEach((socketId) => {
+            io.to(socketId).emit("userStoppedTyping", { senderId: userId });
+        });
+    });
+
     socket.on("disconnect", () => {
         console.log("A user disconnected", socket.id);
         const userSockets = userSocketMap.get(userId);
