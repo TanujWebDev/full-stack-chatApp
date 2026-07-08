@@ -157,9 +157,9 @@ const ChatContainer = () => {
 
     if (isNewMessage) {
       setTimeout(() => {
-        messageEndRef.current?.scrollIntoView({ 
-          behavior: prevMessagesLength.current === 0 ? "auto" : "smooth" 
-        });
+        if (containerRef.current) {
+          containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
       }, 50);
     }
 

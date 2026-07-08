@@ -276,43 +276,52 @@ export const useChatStore = create((set, get) => ({
 
     socket.off("newMessage");
     socket.on("newMessage", async (newMessage) => {
-      const { messages, selectedUser, users } = get();
+      const { selectedUser } = get();
 
       // If the message is part of the current active conversation
       if (selectedUser && !selectedUser.isGroup && String(newMessage.senderId) === String(selectedUser._id)) {
-        if (!messages.some((message) => message._id === newMessage._id)) {
-          set({ 
-            messages: [...messages, newMessage],
-            users: moveUserToTop(users, selectedUser._id)
-          });
-          // Instantly mark as read
-          try {
-            await axiosInstance.put(`/messages/read/${selectedUser._id}`);
-          } catch (e) {
-            console.error("Failed to read message in real-time:", e);
+        set((state) => {
+          if (state.messages.some((message) => String(message._id) === String(newMessage._id))) {
+            return state;
           }
+          return { 
+            messages: [...state.messages, newMessage],
+            users: moveUserToTop(state.users, selectedUser._id)
+          };
+        });
+
+        // Instantly mark as read
+        try {
+          await axiosInstance.put(`/messages/read/${selectedUser._id}`);
+        } catch (e) {
+          console.error("Failed to read message in real-time:", e);
         }
       } else if (!newMessage.groupId) {
         // Refresh contacts to pull in any new first-time sender
         await get().getUsers(false);
         // Increment unread count for that user in the list
-        const updatedUsers = get().users.map((user) => {
-          if (String(user._id) === String(newMessage.senderId)) {
-            return { ...user, unreadCount: (user.unreadCount || 0) + 1 };
-          }
-          return user;
+        set((state) => {
+          const updatedUsers = state.users.map((user) => {
+            if (String(user._id) === String(newMessage.senderId)) {
+              return { ...user, unreadCount: (user.unreadCount || 0) + 1 };
+            }
+            return user;
+          });
+          return { users: moveUserToTop(updatedUsers, newMessage.senderId) };
         });
-        set({ users: moveUserToTop(updatedUsers, newMessage.senderId) });
       }
     });
 
     socket.off("newGroupMessage");
     socket.on("newGroupMessage", (newMessage) => {
-      const { selectedUser, messages } = get();
+      const { selectedUser } = get();
       if (selectedUser && selectedUser.isGroup && String(newMessage.groupId) === String(selectedUser._id)) {
-        if (!messages.some((m) => m._id === newMessage._id)) {
-          set({ messages: [...messages, newMessage] });
-        }
+        set((state) => {
+          if (state.messages.some((m) => String(m._id) === String(newMessage._id))) {
+            return state;
+          }
+          return { messages: [...state.messages, newMessage] };
+        });
       }
     });
 
