@@ -90,8 +90,6 @@ const ChatContainer = () => {
     getMessages,
     isMessagesLoading,
     selectedUser,
-    subscribeToMessages,
-    unsubscribeFromMessages,
     hasMoreMessages,
     typingUsers,
     toggleStarMessage,
@@ -102,7 +100,7 @@ const ChatContainer = () => {
     toggleBlockUser
   } = useChatStore();
 
-  const {authUser, socket} = useAuthStore();
+  const {authUser} = useAuthStore();
   const messageEndRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -118,7 +116,6 @@ const ChatContainer = () => {
 
   useEffect(() => {
     getMessages(selectedUser._id);
-    subscribeToMessages();
 
     // Reset scroll tracking and search on user change
     lastFirstMessageId.current = null;
@@ -126,9 +123,7 @@ const ChatContainer = () => {
     prevMessagesLength.current = 0;
     setSearchQuery("");
     setIsSearching(false);
-
-    return () => unsubscribeFromMessages();
-  }, [selectedUser._id, socket, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+  }, [selectedUser._id, getMessages, setSearchQuery]);
 
   // Handle scroll to top pagination
   const handleScroll = async () => {
