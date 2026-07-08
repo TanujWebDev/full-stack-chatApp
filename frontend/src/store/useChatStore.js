@@ -42,15 +42,15 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  getUsers: async () => {
-    set({ isUserLoading: true });
+  getUsers: async (showLoading = true) => {
+    if (showLoading) set({ isUserLoading: true });
     try {
       const res = await axiosInstance.get("/messages/users");
       set({ users: res.data });
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to load users");
     } finally {
-      set({ isUserLoading: false });
+      if (showLoading) set({ isUserLoading: false });
     }
   },
 
@@ -156,7 +156,7 @@ export const useChatStore = create((set, get) => ({
           messages: [...messages, res.data],
           users: moveUserToTop(users, selectedUser._id)
         });
-        get().getUsers();
+        get().getUsers(false);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send message");
@@ -294,7 +294,7 @@ export const useChatStore = create((set, get) => ({
         }
       } else if (!newMessage.groupId) {
         // Refresh contacts to pull in any new first-time sender
-        await get().getUsers();
+        await get().getUsers(false);
         // Increment unread count for that user in the list
         const updatedUsers = get().users.map((user) => {
           if (String(user._id) === String(newMessage.senderId)) {
