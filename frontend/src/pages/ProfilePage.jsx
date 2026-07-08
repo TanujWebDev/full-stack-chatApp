@@ -103,6 +103,7 @@ const ProfilePage = () => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="input input-bordered w-full bg-base-200 focus:outline-none"
+                autoComplete="off"
               />
             </div>
 
