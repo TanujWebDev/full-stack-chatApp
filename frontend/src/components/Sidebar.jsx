@@ -72,12 +72,12 @@ const Sidebar = () => {
   const displayContacts = isSearchingDirectory ? searchDirectory : users;
 
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200 bg-base-100 relative">
+    <aside className="h-full w-full md:w-64 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200 bg-base-100 relative">
       {/* Sidebar Header */}
       <div className="border-b border-base-300 w-full p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MessageSquare className="size-6 text-primary" />
-          <span className="font-bold text-md hidden lg:block">Chats</span>
+          <span className="font-bold text-md">Chats</span>
         </div>
         {activeTab === "groups" && (
           <button
@@ -91,40 +91,40 @@ const Sidebar = () => {
       </div>
 
       {/* Sidebar Tabs */}
-      <div className="flex border-b border-base-300 p-2 gap-1 justify-center lg:justify-start">
+      <div className="flex border-b border-base-300 p-2 gap-1 justify-center">
         <button
           onClick={() => {
             setActiveTab("chats");
             setSearchContact("");
           }}
-          className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
             activeTab === "chats" 
               ? "bg-primary text-primary-content shadow-md" 
               : "hover:bg-base-200 text-zinc-500"
           }`}
         >
-          <span className="hidden lg:inline">Contacts</span>
-          <Users size={16} className="inline lg:hidden mx-auto" />
+          <Users size={14} />
+          <span>Contacts</span>
         </button>
         <button
           onClick={() => {
             setActiveTab("groups");
             setSearchContact("");
           }}
-          className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
             activeTab === "groups" 
               ? "bg-primary text-primary-content shadow-md" 
               : "hover:bg-base-200 text-zinc-500"
           }`}
         >
-          <span className="hidden lg:inline">Groups ({groups.length})</span>
-          <Plus size={16} className="inline lg:hidden mx-auto" />
+          <Plus size={14} />
+          <span>Groups ({groups.length})</span>
         </button>
       </div>
 
       {/* Directory Search Box (WhatsApp style search/discover contact trigger) */}
       {activeTab === "chats" && (
-        <div className="p-3 border-b border-base-300 hidden lg:block relative animate-fade-in">
+        <div className="p-3 border-b border-base-300 block relative animate-fade-in">
           <div className="relative flex items-center bg-base-200 rounded-lg px-2.5 py-1.5 border border-base-300">
             <Search size={14} className="text-zinc-500 mr-2 shrink-0" />
             <input
@@ -170,7 +170,7 @@ const Sidebar = () => {
                   ${selectedUser && !selectedUser.isGroup && selectedUser._id === user._id ? "bg-base-200 ring-1 ring-base-200 font-semibold" : ""}
                 `}
               >
-                <div className="relative mx-auto lg:mx-0">
+                <div className="relative mx-0">
                   <img
                     src={user.profilePic || "/avatar.png"}
                     alt={user.fullName}
@@ -186,7 +186,7 @@ const Sidebar = () => {
                   )}
                 </div>
 
-                <div className="hidden lg:flex flex-1 items-center justify-between min-w-0">
+                <div className="flex flex-1 items-center justify-between min-w-0">
                   <div className="text-left min-w-0">
                     <div className="font-medium truncate text-sm">{user.fullName}</div>
                   </div>
@@ -227,13 +227,13 @@ const Sidebar = () => {
                 ${selectedUser && selectedUser.isGroup && selectedUser._id === group._id ? "bg-base-200 ring-1 ring-base-200 font-semibold" : ""}
               `}
             >
-              <div className="relative mx-auto lg:mx-0">
+              <div className="relative mx-0">
                 <div className="size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-primary/20 font-bold text-lg">
                   {group.name.substring(0, 2).toUpperCase()}
                 </div>
               </div>
 
-              <div className="hidden lg:flex flex-1 flex-col items-start min-w-0">
+              <div className="flex flex-1 flex-col items-start min-w-0">
                 <div className="font-medium truncate w-full text-left">{group.name}</div>
                 <div className="text-xs text-zinc-400 truncate w-full text-left">
                   {group.members?.length || 0} members

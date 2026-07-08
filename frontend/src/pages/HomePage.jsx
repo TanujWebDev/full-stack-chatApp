@@ -22,19 +22,21 @@ const HomePage = () => {
       <div className="flex items-center justify-center pt-20 px-4">
         <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
           <div className="flex h-full rounded-lg overflow-hidden">
-            <Sidebar />
+            {/* Sidebar Column Wrapper */}
+            <div className={`h-full ${selectedUser ? "hidden md:block" : "w-full md:w-auto"}`}>
+              <Sidebar />
+            </div>
 
-            {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
-            
+            {/* Chat Column Wrapper */}
+            <div className={`h-full flex-1 ${!selectedUser ? "hidden md:flex" : "flex"}`}>
+              {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+            </div>
           </div>
-
         </div>
-
       </div>
-      
     </div>
-  )
-}
+  );
+};
 
 export default HomePage
 

@@ -1,4 +1,4 @@
-import { X, Phone, Video } from "lucide-react";
+import { X, Phone, Video, ChevronLeft } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 
@@ -9,26 +9,37 @@ const ChatHeader = ({ onOpenInfo, onStartCall }) => {
   return (
     <div className="p-2.5 border-b border-base-300 bg-base-100">
       <div className="flex items-center justify-between">
-        <div 
-          onClick={onOpenInfo}
-          className="flex items-center gap-3 cursor-pointer hover:bg-base-200/50 px-2 py-1 rounded-xl transition-colors min-w-0"
-        >
-          {/* Avatar */}
-          <div className="avatar shrink-0">
-            <div className="size-10 rounded-full relative">
-              <img
-                src={selectedUser.profilePic || "/avatar.png"}
-                alt={selectedUser.fullName}
-              />
-            </div>
-          </div>
+        <div className="flex items-center gap-1 min-w-0">
+          {/* Back button on mobile */}
+          <button
+            onClick={() => setSelectedUser(null)}
+            className="md:hidden p-1.5 mr-0.5 rounded-full hover:bg-base-200 transition-colors text-zinc-500 hover:text-base-content shrink-0 cursor-pointer"
+            title="Back to chats"
+          >
+            <ChevronLeft size={22} />
+          </button>
 
-          {/* User info */}
-          <div className="truncate">
-            <h3 className="font-medium truncate">{selectedUser.fullName}</h3>
-            <p className="text-sm text-base-content/70">
-              {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
-            </p>
+          <div 
+            onClick={onOpenInfo}
+            className="flex items-center gap-3 cursor-pointer hover:bg-base-200/50 px-2 py-1 rounded-xl transition-colors min-w-0"
+          >
+            {/* Avatar */}
+            <div className="avatar shrink-0">
+              <div className="size-10 rounded-full relative">
+                <img
+                  src={selectedUser.profilePic || "/avatar.png"}
+                  alt={selectedUser.fullName}
+                />
+              </div>
+            </div>
+
+            {/* User info */}
+            <div className="truncate">
+              <h3 className="font-medium truncate text-sm sm:text-base">{selectedUser.fullName}</h3>
+              <p className="text-xs text-base-content/70">
+                {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -55,7 +66,7 @@ const ChatHeader = ({ onOpenInfo, onStartCall }) => {
           {/* Close button */}
           <button
             onClick={() => setSelectedUser(null)}
-            className="cursor-pointer p-2 rounded-full hover:bg-base-200 transition-colors text-zinc-500 hover:text-base-content"
+            className="hidden md:block cursor-pointer p-2 rounded-full hover:bg-base-200 transition-colors text-zinc-500 hover:text-base-content"
           >
             <X size={18} />
           </button>
