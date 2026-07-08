@@ -189,15 +189,6 @@ const Sidebar = () => {
                 <div className="hidden lg:flex flex-1 items-center justify-between min-w-0">
                   <div className="text-left min-w-0">
                     <div className="font-medium truncate text-sm">{user.fullName}</div>
-                    <div className="text-xs text-zinc-400">
-                      {user.about ? (
-                        <span className="truncate block max-w-[150px]">{user.about}</span>
-                      ) : onlineUsers.includes(user._id) ? (
-                        "Online"
-                      ) : (
-                        "Offline"
-                      )}
-                    </div>
                   </div>
                   {user.unreadCount > 0 && !isSearchingDirectory && (
                     <span className="bg-primary text-primary-content text-[10px] font-bold px-2 py-0.5 rounded-full">
